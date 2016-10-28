@@ -1,6 +1,7 @@
 * {
 	margin: 0px;
 	padding: 0px;
+	background-color: rgb(255, 239, 191);
 }
 html {
 	padding-top: 60px;
@@ -17,10 +18,18 @@ h1 {
 p {
 	margin-left: 250px;
 }
-form {
+#difficulty {
 	position: absolute;
-	left: 100px;
-	top: 100px;
+	left: 20px;
+	top: 120px;
+	border: 1px solid grey;
+	background-color: lightblue;
+	padding: 10px;
+}
+#settings {
+	position: absolute;
+	left: 20px;
+	top: 205px;
 	border: 1px solid grey;
 	background-color: lightblue;
 	padding: 10px;
@@ -146,10 +155,19 @@ form {
 	border: 2px solid grey;
 	margin: 0px;
 }
+.explosion {
+	background: url('explosion.png');
+	background-size: cover;
+	width: 25px;
+	height: 25px;
+	display: inline-block;
+	border: 2px solid grey;
+	margin: 0px;
+}
 #score {
 	position: absolute;
-	top: 190px;
-	left: 100px;
+	top: 60px;
+	left: 20px;
 	width: 78px;
 	height: 35px;
 	border: 1px solid grey;
@@ -160,8 +178,8 @@ form {
 }
 #timer {
 	position: absolute;
-	top: 260px;
-	left: 100px;
+	top: 60px;
+	left: 120px;
 	width: 78px;
 	height: 35px;
 	border: 1px solid grey;
@@ -172,8 +190,8 @@ form {
 }
 #bombsleft {
 	position: absolute;
-	top: 320px;
-	left: 100px;
+	top: 120px;
+	left: 120px;
 	width: 78px;
 	height: 35px;
 	border: 1px solid grey;

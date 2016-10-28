@@ -11,7 +11,7 @@
 			<div id = 'world'></div>
 		</div>
 		<div id = "form-border"> 
-			<form>
+			<form id = "difficulty">
 				  <input type="radio" id = "easy" name="difficulty" value="easy" checked> Easy<br>
 				  <input type="radio" id = "medium" name="difficulty" value="medium"> Medium<br>
 				  <input type="radio" id = "hard" name="difficulty" value="hard"> Hard
@@ -20,15 +20,30 @@
 		<div id = "timer"></div>
 		<div id = "score"></div>
 		<div id = "bombsleft"></div>
+		<div id = "form-border2"> 
+			<form = id = "settings">
+				Set Bombs: <br>
+				 <input type="text" id = "bombs" name="bombs"> <br>
+				Set Height: <br>
+				 <input type="text" id = "height" name="height"> <br>
+				Set Width: <br>
+				 <input type="text" id = "width" name="width"> <br>
+				 <input type = "submit" value = "submit">
+			</form>	
+		</div>
 	</div>
 	
 	<script>
 
 /*------------ Difficulty settings */
 /*---------------------------------*/
+	var world = [];
 	var bombsLeft = 0;
 	var flagsused = 0;
 	var time = 0;
+	var y;
+	var x;
+	var bombcounter;
 	setInterval(displayTime, 1000);
 	var count = 0;
 	var score = 0;
@@ -39,83 +54,75 @@
 		mapwidth: 10,
 	}
 	$(document).on('click','#easy', function(){
-		var x = Math.floor((event.clientX - 260) / 29);
-		var y = Math.floor((event.clientY - 60) / 29);
 		count = 0;
-		if(world[y][x] == 2 && count == 0){
-			count++;
-			while(world[y][x] == 2){
-				refreshBombs();
-				countBombs();
-			}	
-		}
+		flagsused = 0;
 		difficulty.bombcount = 20;
 		difficulty.mapheight = 10;
 		difficulty.mapwidth = 10;
 		masterMap();
 		time = 0;
+		score = 0;
 	});
 	$(document).on('click','#medium', function(){
-		var x = Math.floor((event.clientX - 260) / 29);
-		var y = Math.floor((event.clientY - 60) / 29);
 		count = 0;
-		if(world[y][x] == 2 && count == 0){
-			count++;
-			while(world[y][x] == 2){
-				refreshBombs();
-				countBombs();
-			}	
-		}
-		difficulty.bombcount = 80;
+		flagsused = 0;
+		difficulty.bombcount = 60;
 		difficulty.mapheight = 20;
 		difficulty.mapwidth = 20;
 		masterMap();
 		time = 0;
+		score = 0;
 	});	
 	$(document).on('click','#hard', function(){
-		var x = Math.floor((event.clientX - 260) / 29);
-		var y = Math.floor((event.clientY - 60) / 29);
 		count = 0;
-		if(world[y][x] == 2 && count == 0){
-			count++;
-			while(world[y][x] == 2){
-				refreshBombs();
-				countBombs();
-			}	
-		}
-		difficulty.bombcount = 250;
-		difficulty.mapheight = 30;
-		difficulty.mapwidth = 30;
+		flagsused = 0;
+		difficulty.bombcount = 120;
+		difficulty.mapheight = 25;
+		difficulty.mapwidth = 25;
 		masterMap();
 		time = 0;
+		score = 0;
 	});
+	$(document).ready(function() {
+		$('form').submit(function() {
+			count = 0;
+			flagsused = 0;
+			difficulty.bombcount =  $('#bombs').val();
+			difficulty.mapheight = $('#height').val();
+			difficulty.mapwidth = $('#width').val();
+			masterMap();
+			time = 0;
+			score = 0;
+			return false;
+		})
+	})
 
 /*------------ Difficulty settings */
 /*---------------------------------*/
 
-	var world = [];
 
 /*------------------------RIGHT CLICK ------*/
 /*------------------------RIGHT CLICK ------*/
 	$(document).on('contextmenu', function (e) {
-        var x = Math.floor((e.pageX - 260) / 29);
-		var y = Math.floor((e.pageY - 60) / 29);
-		console.log(x);
-		console.log(y);
+        x = Math.floor((e.pageX - 260) / 29);
+		y = Math.floor((e.pageY - 60) / 29);
 		if(world[y][x] == 2) {
 			world[y][x] = 3;
+			flagsused++;
 		}
 		else if(world[y][x] == 1) {
 			world[y][x] = 13;
+			flagsused++;
 		}
 		else if(world[y][x] == 3) {
 			world[y][x] = 2;
+			flagsused--;
 		}
 		else if(world[y][x] == 13) {
 			world[y][x] = 1;
+			flagsused--;
 		}
 		displayMap();
-		flagsused++;
 		return false;
     });
 
@@ -184,6 +191,9 @@
 				}
 				else if(world[i][j] == 13) {
 					output += "<div class ='btn red'></div>";
+				}
+				else if(world[i][j] == 14) {
+					output += "<div class ='btn explosion'></div>";
 				}
 			}
 			output += "\n</div>";
@@ -263,94 +273,915 @@
 	});
 // });
 
-
-
-$(document).mouseup(function(event) {
-	switch (event.which) {
-		case 1:
-		var x = Math.floor((event.clientX - 260) / 29);
-		var y = Math.floor((event.clientY - 60) / 29);
-		count++
-		if(world[y][x] == 2 && count == 1){
+	function preventFirstClickLoss() {
+		count++;
+		if(world[y][x] == 2 && count <= 2){
 			count++;
 			while(world[y][x] == 2){
 				refreshBombs();
 				countBombs();
 			}	
 		}
+	}
+
+	function zeroClick1() {
+		bombcounter = 0;
+		y++;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		y--;
+	}
+	function zeroClick2() {
+		bombcounter = 0;
+		y--;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] == bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		y++
+	}
+	function zeroClick3() {
+		bombcounter = 0;
+		x++;
+		y++;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x--;
+		y--;
+	}
+	function zeroClick4() {
+		bombcounter = 0;
+		x++;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x--;
+	}
+	function zeroClick5() {
+		bombcounter = 0;
+		x++;
+		y--;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x--;
+		y++;
+	}
+	function zeroClick6() {
+		bombcounter = 0;
+		x--;
+		y++;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x++;
+		y--;
+	}
+	function zeroClick7() {
+		bombcounter = 0;
+		x--;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x++;
+	}
+	function zeroClick8() {
+		bombcounter = 0;
+		x--;
+		y--;
+		if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
+				score++;
+				displayScore();
+		}
+		else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
+					bombcounter++;
+				}
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
+					bombcounter++;
+				}
+				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
+				score++;
+				displayScore();
+		}
+		x++;
+		y++;
+	}
+$(document).mouseup(function(event) {
+	switch (event.which) {
+		case 1:
+		 x = Math.floor((event.clientX - 260) / 29);
+		 y = Math.floor((event.clientY - 60) / 29);
+		preventFirstClickLoss();
 		var bombcounter = 0;
 		if(mark == false) {
 			if(world[y][x] == 2) {
-				alert('You hit a bomb and lost!');
+				world[y][x] = 14;
+				flagsused++;
+				var snd = new Audio("explosion.wav");
+				snd.play();
 				score -= 15;
 				displayScore();
 			}
 			else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] != undefined) {
-				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3  || world[y-1][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y-1][x] == 2 || world[y-1][x] == 3) {
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
 					bombcounter++;
 				}
-				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3) {
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
 					bombcounter++;
 				}
-				if(world[y][x-1] == 2 || world[y][x-1] == 3) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y][x+1] == 2 || world[y][x+1] == 3) {
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3) {
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x] == 2 || world[y+1][x] == 3) {
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3) {
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
 					bombcounter++;
 				}
 				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick2();
+					zeroClick3();
+					zeroClick4();
+					zeroClick5();
+					zeroClick6();
+					zeroClick7();
+					zeroClick8();
+				}
 				score++;
 				displayScore();
 			}
 			else if(world[y][x] == 1 && world[y+1] == undefined && world[y-1] != undefined) {
-				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3) {
+				if(world[y-1][x-1] == 2 || world[y-1][x-1] == 3 || world[y-1][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y-1][x] == 2 || world[y-1][x] == 3) {
+				if(world[y-1][x] == 2 || world[y-1][x] == 3 || world[y-1][x] == 14) {
 					bombcounter++;
 				}
-				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3) {
+				if(world[y-1][x+1] == 2 || world[y-1][x+1] == 3 || world[y-1][x+1] == 14) {
 					bombcounter++;
 				}
-				if(world[y][x-1] == 2 || world[y][x-1] == 3) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y][x+1] == 2 || world[y][x+1] == 3) {
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
 					bombcounter++;
 				}
 				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick2();
+					zeroClick4();
+					zeroClick5();
+					zeroClick7();
+					zeroClick8();
+				}
 				score++;
 				displayScore();
 			}
 			else if(world[y][x] == 1 && world[y+1] != undefined && world[y-1] == undefined) {
-				if(world[y][x-1] == 2 || world[y][x-1] == 3) {
+				if(world[y][x-1] == 2 || world[y][x-1] == 3 || world[y][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y][x+1] == 2 || world[y][x+1] == 3) {
+				if(world[y][x+1] == 2 || world[y][x+1] == 3 || world[y][x+1] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3) {
+				if(world[y+1][x-1] == 2 || world[y+1][x-1] == 3 || world[y+1][x-1] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x] == 2 || world[y+1][x] == 3) {
+				if(world[y+1][x] == 2 || world[y+1][x] == 3 || world[y+1][x] == 14) {
 					bombcounter++;
 				}
-				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3) {
+				if(world[y+1][x+1] == 2 || world[y+1][x+1] == 3 || world[y+1][x+1] == 14) {
 					bombcounter++;
 				}
 				world[y][x] = bombcounter + 4;
+				if(bombcounter == 0) {
+					zeroClick1();
+					zeroClick4();
+					zeroClick3();
+					zeroClick7();
+					zeroClick6();
+				}
 				score++;
 				displayScore();
 			}
