@@ -6,7 +6,7 @@
 </head>
 <body>
 	<div id = "container">
-		<h1>MineSweeper</h1>
+		<h1>MineSweeper @ CodingDojo</h1>
 		<div id = "wrapper">
 			<div id = 'world'></div>
 		</div>
@@ -85,6 +85,7 @@
 	});
 	$(document).ready(function() {
 		$('form').submit(function() {
+			// formUseCheck();
 			count = 0;
 			flagsused = 0;
 			difficulty.bombcount =  $('#bombs').val();
@@ -128,7 +129,12 @@
 
 /*------------------------RIGHT CLICK ------*/
 /*------------------------RIGHT CLICK ------*/
-	
+	// function formUseCheck() {
+	// 	if($('#bombs').val() > ($('#height').val() * $('#width').val()) {
+	// 			alert("Too many bombs!");
+	// 			return false;
+	// 		}
+	// }
 	function masterMap() {
 		refreshMap();
 		setMap();
@@ -157,7 +163,7 @@
 					output += "<div class='box btn'></div>";
 				}
 				else if(world[i][j] == 2) {
-					output += "<div class ='bomb btn'></div>";
+					output += "<div class ='box btn'></div>";
 				}
 				else if(world[i][j] == 3) {
 					output += "<div class ='btn red'></div>";
@@ -1192,7 +1198,6 @@ $(document).mouseup(function(event) {
 });
 
 /* TO DO LIST
-1) add input boxes
 2) create a mouse down and mouse up function */
 
 	</script>

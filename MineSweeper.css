@@ -2,6 +2,8 @@
 	margin: 0px;
 	padding: 0px;
 	background-color: rgb(255, 239, 191);
+	color: rgb(237, 75, 0);
+	font-weight: 700;
 }
 html {
 	padding-top: 60px;
