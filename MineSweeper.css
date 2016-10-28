@@ -20,6 +20,9 @@ h1 {
 p {
 	margin-left: 250px;
 }
+#world{
+	position: fixed;
+}
 #difficulty {
 	position: absolute;
 	left: 20px;
